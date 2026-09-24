@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mijn Custom Formulier</title>
+    <!-- Laad de officiële Office-bibliotheek in zodat de website met Excel kan praten -->
+    <script src="https://microsoft.com" type="text/javascript"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f5f7;
+        }
+        /* Jouw custom titelbalk met transparantie */
+        .title-bar {
+            background: rgba(43, 87, 154, 0.85); /* Excel blauw met 85% transparantie */
+            color: white;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-container {
+            padding: 20px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0 16px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            background-color: #107c41; /* Excel groen */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            background-color: #0b5930;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <span>⚙️ Mijn Custom Formulier</span>
+    </div>
+    <div class="form-container">
+        <label for="username">Invoer data:</label>
+        <input type="text" id="userInput" class="input-field" placeholder="Typ hier de tekst voor Excel...">
+        <button id="submitBtn" class="submit-btn">Naar Excel Sturen</button>
+    </div>
+
+    <script>
+        // Activeer de Office-koppeling zodra Excel er klaar voor is
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Excel) {
+                document.getElementById("submitBtn").onclick = schrijfNaarExcel;
+            }
+        });
+
+        async function schrijfNaarExcel() {
+            try {
+                await Excel.run(async (context) => {
+                    const sheet = context.workbook.worksheets.getActiveWorksheet();
+                    const range = sheet.getRange("A1");
+                    const waarde = document.getElementById("userInput").value;
+                    
+                    range.values = [[waarde]];
+                    await context.sync();
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
