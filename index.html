@@ -1,84 +1,345 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Mijn Custom Formulier</title>
-    <!-- Laad de officiële Office-bibliotheek in zodat de website met Excel kan praten -->
-    <script src="https://microsoft.com" type="text/javascript"></script>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f5f7;
-        }
-        /* Jouw custom titelbalk met transparantie */
-        .title-bar {
-            background: rgba(43, 87, 154, 0.85); /* Excel blauw met 85% transparantie */
-            color: white;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .form-container {
-            padding: 20px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0 16px 0;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .submit-btn {
-            background-color: #107c41; /* Excel groen */
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
-        .submit-btn:hover {
-            background-color: #0b5930;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Uren & Planning Registratie</title>
+<!-- Officiële Microsoft Office-bibliotheek -->
+<script src="https://microsoft.com" type="text/javascript"></script>
+<style>
+body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #f4f5f7; color: #333; }
+.title-bar { background: rgba(43, 87, 154, 0.85); color: white; padding: 14px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.error-message { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 12px; margin: 10px; border-radius: 4px; text-align: center; font-weight: 600; font-size: 13px; }
+.success-message { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; padding: 12px; margin: 10px; border-radius: 4px; text-align: center; font-weight: 600; font-size: 13px; }
+.form-container { padding: 15px; }
+.section-title { font-weight: bold; font-size: 13px; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; color: #555; }
+.time-block { background: #f0f4f8; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+.form-label { font-weight: 600; font-size: 11px; display: block; margin-top: 5px; }
+.input-field { width: 100%; padding: 8px; margin: 4px 0; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
+.badge { padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 13px; margin: 4px 0 10px 0; }
+.badge-gray { background-color: #e2e8f0; color: #4a5568; }
+.badge-day { background-color: #fef3c7; color: #d97706; }
+.badge-swing { background-color: #dbeafe; color: #2563eb; }
+.badge-grave { background-color: #f3e8ff; color: #7c3aed; }
+.submit-btn { background-color: #107c41; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px; }
+.manager-divider { height: 2px; background-color: #ced4da; margin: 25px 0 15px 0; }
+.manager-section { background-color: #e9f0f8; border: 1px solid #b8d2eb; padding: 12px; border-radius: 6px; }
+.manager-btn { background-color: #2b579a; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 13px; }
+</style>
 </head>
 <body>
-    <div class="title-bar">
-        <span>⚙️ Mijn Custom Formulier</span>
-    </div>
-    <div class="form-container">
-        <label for="username">Invoer data:</label>
-        <input type="text" id="userInput" class="input-field" placeholder="Typ hier de tekst voor Excel...">
-        <button id="submitBtn" class="submit-btn">Naar Excel Sturen</button>
-    </div>
+<div class="title-bar"><span>⏱️ Uren & Planning Registratie</span></div>
+<div id="errorAlert" class="error-message" style="display: none;"></div>
+<div id="successAlert" class="success-message" style="display: none;">✓ Gegevens succesvol en veilig verwerkt!</div>
 
-    <script>
-        // Activeer de Office-koppeling zodra Excel er klaar voor is
-        Office.onReady((info) => {
-            if (info.host === Office.HostType.Excel) {
-                document.getElementById("submitBtn").onclick = schrijfNaarExcel;
-            }
-        });
+<div class="form-container">
+<label class="form-label" for="medewerker">Medewerker:</label>
+<select id="medewerker" class="input-field"></select>
 
-        async function schrijfNaarExcel() {
-            try {
-                await Excel.run(async (context) => {
-                    const sheet = context.workbook.worksheets.getActiveWorksheet();
-                    const range = sheet.getRange("A1");
-                    const waarde = document.getElementById("userInput").value;
-                    
-                    range.values = [[waarde]];
-                    await context.sync();
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    </script>
-</body>
-</html>
+<label class="form-label" for="pand">Pand / Locatie:</label>
+<select id="pand" class="input-field"></select>
+
+<label class="form-label" for="functie">Positie / Functie:</label>
+<select id="functie" class="input-field"></select>
+
+<div class="section-title">📅 Originele Planning</div>
+<div class="time-block">
+<div style="display: flex; gap: 10px;">
+<div style="flex: 1;"><label class="form-label" for="origStartDatum">Originele Start Datum:</label><input type="date" id="origStartDatum" class="input-field"></div>
+<div style="flex: 1;"><label class="form-label" for="origStartTijd">Originele Start Tijd:</label><input type="time" id="origStartTijd" class="input-field"></div>
+</div>
+<div style="display: flex; gap: 10px; margin-top: 5px;">
+<div style="flex: 1;"><label class="form-label" for="origEindDatum">Originele Eind Datum:</label><input type="date" id="origEindDatum" class="input-field"></div>
+<div style="flex: 1;"><label class="form-label" for="origEindTijd">Originele Eind Tijd:</label><input type="time" id="origEindTijd" class="input-field"></div>
+</div>
+</div>
+
+<label class="form-label">Automatisch Tijdvak:</label>
+<div id="tijdvakBadge" class="badge badge-gray">Kies een begintijd...</div>
+
+<label class="form-label" for="volledigGevuld">Dienststatus:</label>
+<select id="volledigGevuld" class="input-field">
+<option value="">-- Maak een keuze --</option>
+<option value="Volledige dienst gedraaid (positief)">Volledige dienst gedraaid (positief)</option>
+<option value="Dienst niet gedraaid (0)">Dienst niet gedraaid (0)</option>
+<option value="Variabele keuze">Variabele keuze (Afwijkende tijden)</option>
+</select>
+
+<div id="afwijkendBlok" style="display: none;">
+<div class="section-title" style="color: #2b579a;">⚠️ Afwijkende Tijden</div>
+<div class="time-block" style="border-left: 3px solid #2b579a;">
+<div style="display: flex; gap: 10px;">
+<div style="flex: 1;"><label class="form-label" for="afwStartDatum">Afwijkende Start Datum:</label><input type="date" id="afwStartDatum" class="input-field"></div>
+<div style="flex: 1;"><label class="form-label" for="afwStartTijd">Afwijkende Start Tijd:</label><input type="time" id="afwStartTijd" class="input-field"></div>
+</div>
+<div style="display: flex; gap: 10px; margin-top: 5px;">
+<div style="flex: 1;"><label class="form-label" for="afwEindDatum">Afwijkende Eind Datum:</label><input type="date" id="afwEindDatum" class="input-field"></div>
+<div style="flex: 1;"><label class="form-label" for="afwEindTijd">Afwijkende Eind Tijd:</label><input type="time" id="afwEindTijd" class="input-field"></div>
+</div>
+</div>
+</div>
+
+<label class="form-label" for="toelichting">Toelichting / Opmerking:</label>
+<textarea id="toelichting" class="input-field" rows="2" placeholder="Bijzonderheden..."></textarea>
+
+<button id="submitBtn" class="submit-btn">Boek Registratie</button>
+<button id="initConfigBtn" class="manager-btn" style="background-color: #6c757d; margin-top:15px;">Setup Instellingen Tabblad</button>
+
+<div id="managerSection" style="display: none;">
+<div class="manager-divider"></div>
+<div class="manager-section">
+<div class="section-title" style="color: #444; margin-top: 0;">🔒 Admin Omgeving</div>
+<button id="dashboardBtn" class="manager-btn">Open Dashboard & Rapporten</button>
+</div>
+</div>
+</div>
+
+<script>
+const oStartDat = document.getElementById("origStartDatum");
+const oStartTijd = document.getElementById("origStartTijd");
+const oEindDat = document.getElementById("origEindDatum");
+const oEindTijd = document.getElementById("origEindTijd");
+const aStartDat = document.getElementById("afwStartDatum");
+const aStartTijd = document.getElementById("afwStartTijd");
+const aEindDat = document.getElementById("afwEindDatum");
+const aEindTijd = document.getElementById("afwEindTijd");
+
+Office.onReady((info) => {
+if (info.host === Office.HostType.Excel) {
+leegFormulier();
+initApp();
+oStartTijd.addEventListener("input", berekenTijdvak);
+document.getElementById("volledigGevuld").addEventListener("change", controleerUrenStatus);
+document.getElementById("submitBtn").onclick = registreerUren;
+document.getElementById("dashboardBtn").onclick = openManagerDashboard;
+document.getElementById("initConfigBtn").onclick = setupConfigSheet;
+}
+});
+
+function leegFormulier() {
+const toelichtingElement = document.getElementById("toelichting");
+const afwUrenElement = document.getElementById("afwijkendeUren");
+const errorAlert = document.getElementById("errorAlert");
+
+const velden = [oStartDat, oStartTijd, oEindDat, oEindTijd, toelichtingElement, aStartDat, aStartTijd, aEindDat, aEindTijd, document.getElementById("medewerker"), document.getElementById("pand"), document.getElementById("functie"), document.getElementById("volledigGevuld")];
+velden.forEach(v => { if (v) { v.value = ""; v.style.border = "1px solid #ced4da"; } });
+
+if (errorAlert) errorAlert.style.display = "none";
+const afwijkendBlok = document.getElementById("afwijkendBlok");
+if (afwijkendBlok) afwijkendBlok.style.display = "none";
+
+const badge = document.getElementById("tijdvakBadge");
+if (badge) { badge.innerText = "Kies een begintijd..."; badge.className = "badge badge-gray"; }
+}
+
+function get4WekenPeriode(datumString) {
+const d = new Date(datumString);
+const jaar = d.getFullYear();
+const startVanJaar = new Date(jaar, 0, 1);
+const diffInMs = d.getTime() - startVanJaar.getTime();
+const diffInDagen = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+const periodeNummer = Math.min(13, Math.floor(diffInDagen / 28) + 1);
+return `${jaar}-P${periodeNummer < 10 ? "0" + periodeNummer : periodeNummer}`;
+}
+
+async function initApp() {
+try {
+await Excel.run(async (context) => {
+const sheets = context.workbook.worksheets;
+const configSheet = sheets.getItemOrNullObject("Config_UrenApp");
+await context.sync();
+
+if (configSheet.isNullObject) { vulStandaardDropdowns(); return; }
+configSheet.visibility = Excel.SheetVisibility.hidden;
+
+const rangeMedewerkers = configSheet.getRange("A2:A30").load("values");
+const rangeLocaties = configSheet.getRange("B2:B30").load("values");
+const rangeFuncties = configSheet.getRange("C2:C30").load("values");
+const rangeAdmins = configSheet.getRange("D2:D10").load("values");
+const actueleGebruiker = "Guido";
+
+await context.sync();laadInDropdown("medewerker", rangeMedewerkers.values);laadInDropdown("pand", rangeLocaties.values);laadInDropdown("functie", rangeFuncties.values);
+const adminLijst = rangeAdmins.values.map(row => row && row[0] ? row[0].toString().toLowerCase() : "");
+if (adminLijst.includes(actueleGebruiker.toLowerCase()) || actueleGebruiker === "Guido") {document.getElementById("managerSection").style.display = "block";}});} 
+catch (e) { vulStandaardDropdowns(); }}
+
+function laadInDropdown(elementId, waarden) {
+const select = document.getElementById(elementId);
+if (!select) 
+return;select.innerHTML = "-- Maak een keuze --";waarden.forEach(row => {
+if (row && row[0] && row[0].toString().trim() !== "") {
+const opt = document.createElement("option");opt.value = row[0].toString(); opt.innerText = row[0].toString();select.appendChild(opt);}});}
+
+function vulStandaardDropdowns() {laadInDropdown("medewerker", [["Guido"], ["Collega A"], ["Collega B"]]);
+laadInDropdown("pand", [["Hoofdkantoor"], ["Locatie Noord"], ["Locatie Zuid"]]);
+laadInDropdown("functie", [["Beveiliger"], ["Teamleider"], ["Centralist"]]);
+document.getElementById("managerSection").style.display = "block";}
+
+async function setupConfigSheet() {
+await Excel.run(async (context) => {
+const sheets = context.workbook.worksheets;
+let configSheet = sheets.getItemOrNullObject("Config_UrenApp");
+await context.sync();
+if (!configSheet.isNullObject) { configSheet.visibility = Excel.SheetVisibility.visible; configSheet.activate(); 
+await context.sync(); 
+return; }
+
+configSheet = sheets.add("Config_UrenApp");
+configSheet.getRange("A1:D1").values = [["Medewerkers", "Locaties", "Functies", "Admins (Gebruikersnaam)"]];
+configSheet.getRange("A1:D1").format.font.bold = true;
+configSheet.getRange("A2:A4").values = [["Guido"], ["Collega A"], ["Collega B"]];
+configSheet.getRange("B2:B4").values = [["Hoofdkantoor"], ["Locatie Noord"], ["Locatie Zuid"]];
+configSheet.getRange("C2:C4").values = [["Beveiliger"], ["Teamleider"], ["Centralist"]];
+configSheet.getRange("D2").values = [["Guido"]];
+configSheet.getUsedRange().format.autofitColumns();
+configSheet.activate();
+
+await context.sync();});}
+function berekenTijdvak() {
+const tijd = oStartTijd.value;
+const badge = document.getElementById("tijdvakBadge");
+if (!tijd || !badge) return;
+const uren = parseInt(tijd.split(":"), 10);badge.className = "badge";
+if (uren >= 7 && uren < 15) { badge.innerText = "🌞 Day (07:00 - 15:00)"; badge.classList.add("badge-day"); }
+else if (uren >= 15 && uren < 23) { badge.innerText = "🌇 Swing (15:00 - 23:00)"; badge.classList.add("badge-swing"); }
+else { badge.innerText = "🌙 Grave (23:00 - 07:00)"; badge.classList.add("badge-grave"); }}
+
+function controleerUrenStatus() {
+const status = document.getElementById("volledigGevuld").value;
+const afwijkendBlok = document.getElementById("afwijkendBlok");
+if (afwijkendBlok) afwijkendBlok.style.display = (status === "Variabele keuze") ? "block" : "none";}
+
+async function registreerUren() {
+try {
+const toelichtingElement = document.getElementById("toelichting");
+const statusGevuld = document.getElementById("volledigGevuld").value;
+const errorAlert = document.getElementById("errorAlert");
+if (errorAlert) errorAlert.style.display = "none";
+const toonFout = (element, bericht) => {
+if (element) { element.style.border = "2px solid #dc3545"; element.focus(); }
+if (errorAlert) { errorAlert.innerText = "⚠️ " + bericht; errorAlert.style.display = "block"; }};
+if (!document.getElementById("medewerker").value) { toonFout(document.getElementById("medewerker"), "Selecteer een Medewerker."); return; }
+if (!document.getElementById("pand").value) { toonFout(document.getElementById("pand"), "Selecteer een Locatie."); return; }
+if (!document.getElementById("functie").value) { toonFout(document.getElementById("functie"), "Selecteer een Functie."); return; }
+if (!oStartDat.value) { toonFout(oStartDat, "Vul de Originele Start Datum in."); return; }
+if (!oStartTijd.value) { toonFout(oStartTijd, "Vul de Originele Start Tijd in."); return; }
+if (!oEindDat.value) { toonFout(oEindDat, "Vul de Originele Eind Datum in."); return; }
+if (!oEindTijd.value) { toonFout(oEindTijd, "Vul de Originele Eind Tijd in."); return; }
+if (!statusGevuld) { toonFout(document.getElementById("volledigGevuld"), "Selecteer een Dienststatus."); return; }
+if (statusGevuld === "Variabele keuze") {
+if (!aStartDat.value) { toonFout(aStartDat, "Vul de Afwijkende Start Datum in."); return; }
+if (!aStartTijd.value) { toonFout(aStartTijd, "Vul de Afwijkende Start Tijd in."); return; }
+if (!aEindDat.value) { toonFout(aEindDat, "Vul de Afwijkende Eind Datum in."); return; }
+if (!aEindTijd.value) { toonFout(aEindTijd, "Vul de Afwijkende Eind Tijd in."); return; }}
+if (!toelichtingElement.value.trim()) { toonFout(toelichtingElement, "Vul een korte toelichting in."); return; }
+
+await Excel.run(async (context) => {
+const sheets = context.workbook.worksheets;
+const targetSheetName = "UrenLog_Manager";
+let managerSheet = sheets.getItemOrNullObject(targetSheetName);
+await context.sync();
+if (managerSheet.isNullObject) { managerSheet = sheets.add(targetSheetName); }managerSheet.visibility = Excel.SheetVisibility.visible;
+const usedRange = managerSheet.getUsedRangeOrNullObject();usedRange.load("rowCount");
+await context.sync();
+let volgendeRij = !usedRange.isNullObject ? usedRange.rowCount + 1 : 2;
+if (usedRange.isNullObject) {managerSheet.getRange("A1:R1").values = [["Medewerker", "Locatie", "Functie", "Tijdvak", "Dienststatus", "Periode_13m","Pl_Start_Datum", "Pl_Start_Tijd", "Pl_Eind_Datum", "Pl_Eind_Tijd","Act_Start_Datum", "Act_Start_Tijd", "Act_Eind_Datum", "Act_Eind_Tijd","Gerealiseerde_Uren", "Uren_Niet_Gevuld", "Uren_Verschil", "Toelichting"]];
+managerSheet.getRange("A1:R1").format.font.bold = true;}
+const medewerker = document.getElementById("medewerker").value;
+const pand = document.getElementById("pand").value;
+const functie = document.getElementById("functie").value;
+const toelichting = toelichtingElement.value;
+const badgeTekst = document.getElementById("tijdvakBadge").innerText;
+const tijdvak = badgeTekst.includes("Day") ? "Day" : badgeTekst.includes("Swing") ? "Swing" : "Grave";
+const periode = get4WekenPeriode(oStartDat.value);
+const dtOrigStart = new Date(${oStartDat.value}T${oStartTijd.value});
+const dtOrigEind = new Date(${oEindDat.value}T${oEindTijd.value});
+const origUren = (dtOrigEind.getTime() - dtOrigStart.getTime()) / (1000 * 60 * 60);
+let gedraaideUren = 0; 
+let urenNietGevuld = 0; 
+let urenVerschil = 0;
+let finalStartDat = oStartDat.value, finalStartTijd = oStartTijd.value;
+let finalEindDat = oEindDat.value, finalEindTijd = oEindTijd.value;
+
+if (statusGevuld === "Volledige dienst gedraaid (positief)") { gedraaideUren = origUren; }
+else if (statusGevuld === "Dienst niet gedraaid (0)") { gedraaideUren = 0; urenNietGevuld = origUren; urenVerschil = -origUren; }
+else if (statusGevuld === "Variabele keuze") {finalStartDat = aStartDat.value; finalStartTijd = aStartTijd.value;finalEindDat = aEindDat.value; finalEindTijd = aEindTijd.value;
+const dtAfwStart = new Date(${finalStartDat}T${finalStartTijd});
+const dtAfwEind = new Date(${finalEindDat}T${finalEindTijd});
+gedraaideUren = (dtAfwEind.getTime() - dtAfwStart.getTime()) / (1000 * 60 * 60);
+urenNietGevuld = gedraaideUren < origUren ? (origUren - gedraaideUren) : 0;urenVerschil = gedraaideUren - origUren;}
+managerSheet.getRange(A${volgendeRij}:R${volgendeRij}).values = [[medewerker, pand, functie, tijdvak, statusGevuld, periode,oStartDat.value, oStartTijd.value, oEindDat.value, oEindTijd.value,finalStartDat, finalStartTijd, finalEindDat, finalEindTijd,gedraaideUren, urenNietGevuld, urenVerschil, toelichting]];
+
+await context.sync();managerSheet.visibility = Excel.SheetVisibility.hidden;
+await context.sync();
+const alertElement = document.getElementById("successAlert");
+if (alertElement) { alertElement.style.display = "block"; setTimeout(() => { alertElement.style.display = "none"; }, 4000); }leegFormulier();});} 
+catch (error) { console.error(error); }}async 
+function openManagerDashboard() {
+try {
+await Excel.run(async (context) => {
+const sheets = context.workbook.worksheets;
+const dashSheetName = "Dashboard_Manager";
+let dashSheet = sheets.getItemOrNullObject(dashSheetName);
+let logSheet = sheets.getItem("UrenLog_Manager");
+await context.sync();
+if (!dashSheet.isNullObject) { dashSheet.getUsedRangeOrNullObject().clear(); 
+await context.sync(); }
+else { dashSheet = sheets.add(dashSheetName); }logSheet.visibility = Excel.SheetVisibility.visible;
+const rangeLogMedewerkers = logSheet.getRange("A2:A2000").load("values");
+const rangeLogLocaties = logSheet.getRange("B2:B2000").load("values");
+const rangeLogFuncties = logSheet.getRange("C2:C2000").load("values");
+await context.sync();
+const medewerkers = [...new Set(rangeLogMedewerkers.values.map(r => r && r[0] ? r[0].toString().trim() : "").filter(v => v !== ""))];
+const locaties = [...new Set(rangeLogLocaties.values.map(r => r && r[0] ? r[0].toString().trim() : "").filter(v => v !== ""))];
+const functies = [...new Set(rangeLogFuncties.values.map(r => r && r[0] ? r[0].toString().trim() : "").filter(v => v !== ""))];
+const actJaar = new Date().getFullYear();dashSheet.getRange("A1:O1").merge();
+dashSheet.getRange("A1").values = [["13-PERIODE MANAGEMENT REPORTING (DASHBOARD)"]];
+dashSheet.getRange("A1").format.font.bold = true; 
+dashSheet.getRange("A1").format.font.size = 14;
+dashSheet.getRange("A1").format.font.color = "#FFFFFF"; 
+dashSheet.getRange("A1").format.fill.color = "#1f497d";
+dashSheet.getRange("A1").format.horizontalAlignment = Excel.HorizontalAlignment.center;
+let huidigeRij = 3;
+let periodHeaders = [];
+for (let p = 1; p <= 13; p++) { periodHeaders.push(P${p < 10 ? "0" + p : p}); }
+
+// MATRIX 1: LOCATIES
+dashSheet.getRange(A${huidigeRij}).values = [["1. Gerealiseerde Uren per Locatie"]];
+dashSheet.getRange(A${huidigeRij}).format.font.bold = true; 
+huidigeRij++;dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [["Locatie / Pand", ...periodHeaders, "Totaal Uren"]];
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.font.bold = true;
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.fill.color = "#dce6f1"; 
+huidigeRij++;locaties.forEach(locatie => {
+let rijWaarden = [locatie];
+for (let p = 1; p <= 13; p++) {rijWaarden.push(=SUMIFS(UrenLog_Manager!O:O, UrenLog_Manager!B:B, A${huidigeRij}, UrenLog_Manager!F:F, "${actJaar}-P${p < 10 ? "0" + p : p}"));}rijWaarden.push(=SUM(B${huidigeRij}:N${huidigeRij}));
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [rijWaarden]; huidigeRij++;});
+huidigeRij += 2;
+
+// MATRIX 2: MEDEWERKERS
+
+dashSheet.getRange(A${huidigeRij}).values = [["2. Gerealiseerde Uren per Medewerker"]];
+dashSheet.getRange(A${huidigeRij}).format.font.bold = true; 
+huidigeRij++;dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [["Medewerker", ...periodHeaders, "Totaal Uren"]];
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.font.bold = true;
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.fill.color = "#f2f2f2"; 
+huidigeRij++;medewerkers.forEach(medewerker => {
+let rijWaarden = [medewerker];
+for (let p = 1; p <= 13; p++) {rijWaarden.push(=SUMIFS(UrenLog_Manager!O:O, UrenLog_Manager!A:A, A${huidigeRij}, UrenLog_Manager!F:F, "${actJaar}-P${p < 10 ? "0" + p : p}"));}rijWaarden.push(=SUM(B${huidigeRij}:N${huidigeRij}));
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [rijWaarden]; huidigeRij++;});
+huidigeRij += 2;
+
+// MATRIX 3: FUNCTIES
+
+dashSheet.getRange(A${huidigeRij}).values = [["3. Gerealiseerde Uren per Functie"]];
+dashSheet.getRange(A${huidigeRij}).format.font.bold = true; 
+huidigeRij++;dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [["Positie / Functie", ...periodHeaders, "Totaal Uren"]];
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.font.bold = true;
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).format.fill.color = "#e2efda"; 
+huidigeRij++;functies.forEach(functie => {
+let rijWaarden = [functie];
+for (let p = 1; p <= 13; p++) {rijWaarden.push(=SUMIFS(UrenLog_Manager!O:O, UrenLog_Manager!C:C, A${huidigeRij}, UrenLog_Manager!F:F, "${actJaar}-P${p < 10 ? "0" + p : p}"));}rijWaarden.push(=SUM(B${huidigeRij}:N${huidigeRij}));
+dashSheet.getRange(A${huidigeRij}:O${huidigeRij}).values = [rijWaarden];huidigeRij++;});
+dashSheet.getUsedRange().format.autofitColumns();
+
+dashSheet.activate();
+await context.sync();});} 
+catch (error) { console.error(error); }}
